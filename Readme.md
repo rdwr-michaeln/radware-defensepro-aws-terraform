@@ -1,30 +1,16 @@
 # 🛡️ Radware DefensePro AWS Terraform Deployment
 
-This Terraform configuration automates the deployment of **Radware DefensePro** and **Cyber Controller** in AWS with complete DDoS protection infrastructure.
+## 📋 Quick Deployment Guide
 
-## 🏗️ Architecture Overview
-
-- **Customer VPC**: Application subnet + Gateway Load Balancer endpoint
-- **Scrubbing VPC**: DefensePro instances + Cyber Controller management
-- **Gateway Load Balancer**: Traffic inspection and scrubbing
-- **2 DefensePro instances**: High availability DDoS protection
-- **1 Cyber Controller**: Centralized management and monitoring
-- **Target Server**: Apache web server with automated installation
-
-## 📋 Prerequisites
-
-### 1. Install Terraform
-Choose your operating system:
+### 1️⃣ **Install Terraform**
 
 **Ubuntu/Debian:**
 ```bash
-# Add HashiCorp GPG key
+# Add HashiCorp GPG key and repository
 curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-
-# Add HashiCorp repository
 sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
 
-# Update and install Terraform
+# Install Terraform
 sudo apt-get update && sudo apt-get install terraform
 
 # Verify installation
@@ -39,6 +25,129 @@ sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashi
 
 # Install Terraform
 sudo yum -y install terraform
+terraform version
+```
+
+**macOS:**
+```bash
+# Using Homebrew
+brew tap hashicorp/tap
+brew install hashicorp/tap/terraform
+terraform version
+```
+
+### 2️⃣ **Initialize Terraform**
+
+```bash
+terraform init -upgrade
+```
+
+### 3️⃣ **Verify AWS Credentials**
+
+Make sure your AWS credentials are configured correctly:
+```bash
+# Configure AWS CLI if not done
+aws configure
+
+# Verify credentials
+aws sts get-caller-identity
+```
+
+### 4️⃣ **Create Terraform Plan**
+
+⚠️ **Required AMI IDs:**
+- **Cyber Controller AMI**: `ami-0908b747ea20df193`
+- **DefensePro AMI**: `ami-061f99d84c3c52c61`
+
+```bash
+terraform plan -out=defensepro-deployment.tfplan 
+  The AMI ID for CC Enter a value: ami-0908b747ea20df193
+  The AMI ID for DefensePro Enter a value: ami-061f99d84c3c52c61
+  A number to include in resource names Enter a value: 1
+```
+
+**Apply the deployment:**
+```bash
+terraform apply defensepro-deployment.tfplan
+```
+
+### 5️⃣ **Wait for Terraform Completion**
+
+⏳ **Expected deployment time:** 10-15 minutes
+
+After completion, you'll see the deployment summary with all IP addresses and connection details.
+
+### 6️⃣ **Generate and Apply License for Cyber Controller**
+
+1. **Access Cyber Controller Web Interface:**
+   ```
+   https://[CC_PUBLIC_IP]:2189
+   ```
+   - **Username:** `radware`
+   - **Password:** `radware`
+
+2. **Generate and Activate License:**
+   - Navigate to **System → License Management**
+   - Generate/Upload your **Cyber Controller license**
+   - Apply **DefensePro licenses** for both devices
+   - **⚠️ IMPORTANT:** Complete licensing before proceeding to next step
+
+### 7️⃣ **Run Post-Deployment Script**
+
+🔴 **ONLY run this script AFTER completing the license implementation on CC:**
+
+```bash
+./add_dp_to_cc_unified.sh
+```
+
+This script will:
+- Add DefensePro devices to Cyber Controller
+- Install Apache on target server
+- Configure DDoS protection policies
+
+### 8️⃣ **Troubleshooting - DefensePro Devices**
+
+If DefensePro devices are not listed correctly in Cyber Controller:
+
+1. **Access Cyber Controller web interface**
+2. **Navigate to Device Management**
+3. **Edit each DefensePro device**
+4. **Save without making any changes** (this refreshes the configuration)
+5. **Verify devices appear correctly in topology**
+
+### 9️⃣ **Cleanup AWS Resources**
+
+When you want to destroy all resources:
+
+```bash
+terraform destroy -auto-approve \
+  -var="cyber_controller_ami_id=ami-0908b747ea20df193" \
+  -var="defensepro_ami_id=ami-061f99d84c3c52c61"
+```
+
+⚠️ **Warning:** This will permanently delete all created resources.
+
+---
+
+## 🎯 **Architecture Overview**
+
+- **Customer VPC**: Application subnet + Gateway Load Balancer endpoint
+- **Scrubbing VPC**: DefensePro instances + Cyber Controller management
+- **Gateway Load Balancer**: Traffic inspection and scrubbing
+- **2 DefensePro instances**: High availability DDoS protection
+- **1 Cyber Controller**: Centralized management and monitoring
+- **Target Server**: Apache web server with automated installation
+
+## 🔐 **Important Notes**
+
+- AMI IDs are for **eu-north-1** region
+- Always complete **licensing before running scripts**
+- Individual outputs available via: `terraform output -raw <output_name>`
+- Keep AWS credentials secure and properly configured
+
+---
+
+**🚀 Happy Deploying!** Your DDoS protection infrastructure will be ready in minutes!
 
 # Verify installation
 terraform version
@@ -103,10 +212,13 @@ aws configure
    customer_vpc_cidr = "10.1.0.0/16"
    scrubbing_vpc_cidr = "10.10.0.0/16"
    
-   # DefensePro AMI IDs (check latest AMIs in your region)
-   defensepro_ami_id = "ami-xxxxxxxxxxxxxxxxx"
-   cyber_controller_ami_id = "ami-xxxxxxxxxxxxxxxxx"
+   # ⚠️ IMPORTANT: AMI IDs (Required for deployment)
+   # Use these specific AMI IDs for your deployment:
+   cyber_controller_ami_id = "ami-0908b747ea20df193"  # Cyber Controller AMI
+   defensepro_ami_id = "ami-061f99d84c3c52c61"        # DefensePro AMI
    ```
+
+   **📝 Note**: These AMI IDs are region-specific. The provided AMIs are for **eu-north-1** region. If deploying in a different region, contact Radware support for the correct AMI IDs.
 
 ### Step 2: Initialize Terraform
 
@@ -129,28 +241,34 @@ Terraform has been successfully initialized!
 ### Step 3: Plan the Deployment
 
 ```bash
-# Create and review the execution plan
+
+**Alternative: Plan using your terraform.tfvars file**
+```bash
+# If you've configured terraform.tfvars with the AMI IDs
 terraform plan -out=defensepro-deployment.tfplan
+   cyber_controller_ami_id = "ami-0908b747ea20df193"  # Cyber Controller AMI
+   defensepro_ami_id = "ami-061f99d84c3c52c61"        # DefensePro AMI
+   ID  = 1
+
 ```
 
 **This will:**
-- Show all resources that will be created
-- Validate your configuration
+- Show all resources that will be created (VPCs, instances, load balancers, etc.)
+- Validate your configuration and AMI IDs
 - Save the plan to a file for consistent apply
+- Display estimated costs and resource counts
 
 **Review the output carefully** to ensure all resources look correct.
 
 ### Step 4: Apply the Configuration
 
+**Apply the saved plan (Recommended)**
 ```bash
 # Apply the planned configuration
 terraform apply defensepro-deployment.tfplan
 ```
 
-**OR apply directly (will prompt for confirmation):**
-```bash
-terraform apply
-```
+
 
 **During deployment, you'll see:**
 - Resource creation progress
