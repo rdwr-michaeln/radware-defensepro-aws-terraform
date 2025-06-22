@@ -1,0 +1,39 @@
+# Terraform specific files
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars
+
+# SSH Keys (NEVER commit these!)
+*.pem
+*.key
+*-key-*.pem
+target-server-key-*
+
+# Python specific files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+
+# ZIP files
+*.zip
+
+# Ignore any document files
+*.docx
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# TXT files
+*.txt
+
+# Ignore the Readme file if not edited
+# Uncomment the next line if you don't want to track changes to the README.md file
+# README.md
