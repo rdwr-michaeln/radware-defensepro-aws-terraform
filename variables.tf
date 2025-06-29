@@ -1,8 +1,7 @@
 # Variables
 variable "aws_region" {
-  description = "The AWS region to deploy in"
+  description = "The AWS region where the AMI was shered"
   type        = string
-  default     = "eu-north-1"
 }
 
 variable "customer_vpc_cidr" {
@@ -56,7 +55,7 @@ variable "availability_zone_suffix_2" {
 }
 
 variable "defensepro_ami_id" {
-  description = "The AMI ID for DefensePro"
+  description = "Please provide AMI ID for DefensePro"
   type        = string
 }
 
@@ -68,7 +67,7 @@ variable "target_srv_ami_id" {
 
 
 variable "cyber_controller_ami_id" {
-  description = "The AMI ID for CC"
+  description = "Please provide AMI ID for Cyber Controller"
   type        = string
 
 }
@@ -105,7 +104,7 @@ variable "admin_computer_network_for_ssh" {
 
 variable "deployment_index" {
   description = "A number to include in resource names"
-  type        = string
+  default       = "1"
 }
 
 variable "project_name" {
