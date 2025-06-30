@@ -106,6 +106,10 @@ variable "deployment_index" {
   description = "A number to include in resource names"
   default       = "1"
 }
+variable "aws_username" {
+  description = "AWS username for resource naming"
+  type        = string
+}
 
 variable "project_name" {
   type        = string

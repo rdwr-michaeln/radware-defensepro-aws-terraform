@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 locals {
-  resource_suffix = "AMS_${var.deployment_index}"
+  resource_suffix = "${var.aws_username}_${var.deployment_index}"
   availability_zone_1 = "${var.aws_region}${var.availability_zone_suffix_1}"
   availability_zone_2 = "${var.aws_region}${var.availability_zone_suffix_2}"
 
