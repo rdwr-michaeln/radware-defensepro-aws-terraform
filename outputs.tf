@@ -79,19 +79,19 @@ output "deployment_summary" {
       Public IP:  ${aws_eip.cc_eip_mgmt.public_ip}                                    
       Private IP: ${local.scrubbing_mgmt_ip_cc}                                       
       Web URL:    https://${aws_eip.cc_eip_mgmt.public_ip}                       
-      SSH:        ssh admin@${aws_eip.cc_eip_mgmt.public_ip}                          
+      SSH:        ssh root@${aws_eip.cc_eip_mgmt.public_ip}                          
                                                                                        
    🔒 DEFENSEPRO-1                                                                    
       Public IP:  ${aws_eip.defensepro_eip_1.public_ip}                               
       Mgmt IP:    ${local.scrubbing_mgmt_ip_dp_1}                                     
       Data IP:    ${local.defensepro_1_data_ip}                                                       
-      SSH:        ssh admin@${aws_eip.defensepro_eip_1.public_ip}                     
+      SSH:        ssh radware@${aws_eip.defensepro_eip_1.public_ip}                     
                                                                                        
    🔒 DEFENSEPRO-2                                                                    
       Public IP:  ${aws_eip.defensepro_eip_2.public_ip}                               
       Mgmt IP:    ${local.scrubbing_mgmt_ip_dp_2}                                     
       Data IP:    ${local.defensepro_2_data_ip}                                                        
-      SSH:        ssh admin@${aws_eip.defensepro_eip_2.public_ip}                     
+      SSH:        ssh radware@${aws_eip.defensepro_eip_2.public_ip}                     
                                                                                        
    🌐 TARGET SERVER (Apache)                                                          
       Public IP:  ${aws_eip.target_eip_1.public_ip}                                   
@@ -120,9 +120,3 @@ output "deployment_summary" {
   description = "Complete deployment summary with all connection details"
 }
 
-# =============================================================================
-# HOW TO ACCESS INDIVIDUAL VALUES (if needed for debugging)
-# =============================================================================
-# To get individual values, use: terraform output -raw <output_name>
-# Example: terraform output -raw cyber_controller_public_ip
-# Note: Individual outputs are marked as sensitive to keep the main output clean
