@@ -181,12 +181,9 @@ terraform apply defensepro-deployment.tfplan
    - **Password:** `radware`
    - Accept the SSL certificate warning
 
-2. Navigate to **System → License Management**
+2. After login, the Cyber Controller will automatically prompt you with the MAC address of the CC and ask you to provide the activation license.
 
-3. Apply the required licenses:
-   - Cyber Controller license (vision-activation)
-   - DefensePro license for DefensePro-1
-   - DefensePro license for DefensePro-2
+3. Enter the **Cyber Controller license (vision-activation)** when prompted.
 
 ### Step 6 — Run the Post-Deployment Script
 
