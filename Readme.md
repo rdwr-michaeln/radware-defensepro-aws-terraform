@@ -200,7 +200,92 @@ This script will:
 
 ---
 
-## Verification
+## Traffic Flow & Routing
+
+### Network Topology
+
+```
+                        INTERNET
+                            │
+                            ▼
+              ┌─────────────────────────────┐
+              │       CUSTOMER VPC          │
+              │       (10.1.0.0/16)         │
+              │                             │
+              │  Internet Gateway (IGW)     │
+              │         │   ▲              │
+              │  IGW Ingress Route Table    │
+              │  10.1.2.0/24 → GWLBe       │
+              │         │   │              │
+              │         ▼   │              │
+              │  GLB Endpoint Subnet        │
+              │  (10.1.111.0/24)            │
+              │  GWLBe Route Table          │
+              │  0.0.0.0/0 → IGW           │
+              │         │   ▲              │
+              └─────────┼───┼──────────────┘
+                        │   │  GENEVE tunnel (UDP 6081)
+              ┌─────────┼───┼──────────────────────────┐
+              │         ▼   │   SCRUBBING VPC           │
+              │  Gateway Load Balancer                  │
+              │  (DefensePro Data Subnet 10.10.2.0/24)  │
+              │         │   ▲                           │
+              │    ┌────┘   └────┐                      │
+              │    ▼            ▼                       │
+              │  DefensePro-1  DefensePro-2             │
+              │  eth0 10.10.2.10  eth0 10.10.2.11       │
+              │  eth1 10.10.1.10  eth1 10.10.1.11       │
+              │                                         │
+              │  Cyber Controller (10.10.1.20)          │
+              │  (Management only — no data plane)      │
+              └──────────────────────────────────────── ┘
+                        │   ▲
+              ┌─────────┼───┼──────────────┐
+              │         ▼   │              │
+              │  Application Subnet         │
+              │  (10.1.2.0/24)              │
+              │  App Route Table            │
+              │  0.0.0.0/0 → GWLBe         │
+              │                             │
+              │  Target Server (10.1.2.20)  │
+              └─────────────────────────────┘
+```
+
+### Inbound Packet Flow (Internet → Target Server)
+
+1. **Internet → IGW** — Packet arrives at the Customer VPC Internet Gateway destined for the Target Server public IP
+2. **IGW → GWLBe** — The IGW ingress route table redirects traffic for `10.1.2.0/24` to the Gateway Load Balancer Endpoint (GWLBe) in subnet `10.1.111.0/24`
+3. **GWLBe → GLB** — The GWLBe sends the packet (encapsulated in GENEVE UDP/6081) to the Gateway Load Balancer in the Scrubbing VPC
+4. **GLB → DefensePro** — The GLB forwards to one of the two DefensePro instances (`10.10.2.10` or `10.10.2.11`) via their data interface (eth0)
+5. **DefensePro inspects the packet** — DDoS scrubbing is applied; clean traffic is returned back through the same GENEVE tunnel
+6. **GWLBe → Target Server** — After inspection, the packet is delivered to the Target Server (`10.1.2.20`) in the Application Subnet
+
+### Outbound Packet Flow (Target Server → Internet)
+
+1. **Target Server → GWLBe** — The Application Subnet route table sends all outbound traffic (`0.0.0.0/0`) to the GWLBe
+2. **GWLBe → GLB → DefensePro** — Traffic is again forwarded through the Gateway Load Balancer to DefensePro for inspection
+3. **DefensePro → GWLBe** — Clean traffic is returned through the GENEVE tunnel
+4. **GWLBe → IGW → Internet** — The GWLBe route table sends traffic to the IGW (`0.0.0.0/0 → IGW`), which routes it to the internet
+
+### Route Tables Summary
+
+| Route Table | Associated With | Routes |
+|---|---|---|
+| IGW Ingress RT | Internet Gateway (edge) | `10.1.2.0/24` → GWLBe |
+| GWLBe RT | GLB Endpoint Subnet (10.1.111.0/24) | `0.0.0.0/0` → IGW |
+| App-to-GWLBe RT | Application Subnet (10.1.2.0/24) | `0.0.0.0/0` → GWLBe |
+| Scrubbing VPC Default RT | DefensePro Data + MGMT subnets | `10.10.0.0/16` → local, `0.0.0.0/0` → Scrubbing IGW |
+
+### DefensePro Interfaces
+
+Each DefensePro instance has two network interfaces:
+
+| Interface | Subnet | Purpose |
+|---|---|---|
+| eth0 (data) | DefensePro Data Subnet (10.10.2.0/24) | Receives/returns GENEVE-encapsulated traffic from/to GLB |
+| eth1 (mgmt) | Scrubbing MGMT Subnet (10.10.1.0/24) | Management access, Cyber Controller communication, public EIP |
+
+---
 
 ```bash
 # Check all resource status
