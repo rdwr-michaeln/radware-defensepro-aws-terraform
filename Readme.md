@@ -26,41 +26,16 @@ This Terraform configuration has been tested with the following Radware software
 
 ## Prerequisites
 
-### 1. Install Terraform
+### 1. Install Dependencies (Ubuntu)
 
-**Ubuntu/Debian:**
-```bash
-curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-sudo apt-get update && sudo apt-get install -y terraform
-terraform version
-```
+Run the included installer script — it installs Terraform, AWS CLI, and all other required tools automatically:
 
-**CentOS/RHEL:**
-```bash
-sudo yum install -y yum-utils
-sudo yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
-sudo yum -y install terraform
-terraform version
-```
-
-**macOS:**
-```bash
-brew tap hashicorp/tap
-brew install hashicorp/tap/terraform
-terraform version
-```
-
-**Windows:**
-1. Download Terraform from https://www.terraform.io/downloads.html
-2. Extract to a directory (e.g., `C:\terraform`) and add it to your `PATH`
-3. Verify with `terraform version`
-
-Alternatively, run the included dependency installer on Ubuntu:
 ```bash
 chmod +x install_dependencies.sh
 ./install_dependencies.sh
 ```
+
+> For other operating systems, install Terraform manually from https://www.terraform.io/downloads.html and AWS CLI from https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html
 
 ### 2. Configure AWS CLI
 
@@ -100,7 +75,7 @@ aws sts get-caller-identity
    **Required variables (no defaults — Terraform will prompt if not set):**
    ```hcl
    aws_region              = "eu-north-1"    # AWS region to deploy into
-   aws_username            = "your-name"     # Included in resource name suffixes
+   resource_name_username  = "your-name"     # Included in resource name suffixes
    cyber_controller_ami_id = "ami-0908b747ea20df193"  # region-specific
    defensepro_ami_id       = "ami-061f99d84c3c52c61"  # region-specific
    ```
@@ -236,8 +211,6 @@ chmod +x add_dp_to_cc_unified.sh
 This script will:
 1. Add DefensePro-1 and DefensePro-2 to the Cyber Controller
 2. Install Apache on the target server
-3. Configure basic DDoS protection policies
-4. Verify connectivity and traffic flow through the Gateway Load Balancer
 
 ---
 

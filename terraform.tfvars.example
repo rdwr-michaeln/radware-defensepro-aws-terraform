@@ -1,5 +1,7 @@
 aws_region = "eu-north-1"
 
+resource_name_username = "your-name"  # Used as part of resource name suffixes
+
 customer_vpc_cidr = "10.1.0.0/16"
 
 scrubbing_vpc_cidr = "10.10.0.0/16"
