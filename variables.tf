@@ -106,8 +106,8 @@ variable "deployment_index" {
   description = "A number to include in resource names"
   default       = "1"
 }
-variable "aws_username" {
-  description = "AWS username for resource naming"
+variable "resource_name_username" {
+  description = "Username suffix used in AWS resource names"
   type        = string
 }
 
