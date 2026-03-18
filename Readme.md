@@ -204,6 +204,8 @@ This script will:
 
 ### Network Topology
 
+![AWS Topology](images/topology.png)
+
 ```
                         INTERNET
                             │
