@@ -135,7 +135,7 @@ terraform apply defensepro-deployment.tfplan
 
 **Expected deployment time:** 10–15 minutes
 
-After completion you will see a deployment summary similar to:
+> **Note:** As part of `terraform apply`, the Cyber Controller network configuration (management IP, netmask, gateway) is set automatically via SSH — no manual action is required.
 
 ```
 ╔══════════════════════════════════════════════════════════════════════════════╗
@@ -169,20 +169,9 @@ After completion you will see a deployment summary similar to:
 ╚══════════════════════════════════════════════════════════════════════════════╝
 ```
 
-### Step 5 — Configure the Cyber Controller Network
+### Step 5 — License Configuration (REQUIRED)
 
-Run the automated network-configuration script to set the Cyber Controller's management IP, netmask, and gateway via SSH:
-
-```bash
-chmod +x run_cc_automation.sh
-./run_cc_automation.sh
-```
-
-This script connects to the Cyber Controller over SSH and automatically answers the initial network-configuration prompts.
-
-### Step 6 — License Configuration (REQUIRED)
-
-> **Warning:** Do NOT run the post-deployment script in Step 7 until licensing is complete.
+> **Warning:** Do NOT run the post-deployment script in Step 6 until licensing is complete.
 
 1. Open the Cyber Controller web interface:
    ```
@@ -199,7 +188,7 @@ This script connects to the Cyber Controller over SSH and automatically answers 
    - DefensePro license for DefensePro-1
    - DefensePro license for DefensePro-2
 
-### Step 7 — Run the Post-Deployment Script
+### Step 6 — Run the Post-Deployment Script
 
 After licensing is complete:
 
